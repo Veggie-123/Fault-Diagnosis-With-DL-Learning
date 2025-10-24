@@ -1,22 +1,27 @@
-# Ignore image data
-/My_Code_10_Classes/data/STFTimages/
-/Teacher_Code/data/STFTimages/
-
-# Ignore python cache
+# 忽略 Python 缓存文件
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Ignore model checkpoints
-/My_Code_10_Classes/STFT_CNN/checkpoints/
-/My_Code_10_Classes/STFT_CNN_Pretrained/checkpoints/
-/Teacher_Code/checkpoints/
-
-# Ignore results
-/Teacher_Code/results/
-
-# IDE and OS specific files
+# 忽略 IDE 和操作系统相关的特定文件
 .vscode/
 .idea/
 *.DS_Store
+
+# --- 数据及模型产物 ---
+# 使用通配符进行更广泛的匹配，以避免使用特定的路径规则。
+
+# 忽略所有 STFTimages 目录下的 .png 文件
+**/STFTimages/**/*.png
+
+# 忽略所有 'results' 目录下的内容。
+# 如果希望追踪这个目录本身（即使它是空的），
+# 可以在该目录内创建一个名为 '.gitkeep' 的空文件。
+**/results/*
+
+# 不要忽略 .gitkeep 文件，这样空目录就可以被追踪。
+!**/.gitkeep
+
+# 忽略通过脚本生成的较大的 CSV 文件
+samples_data.csv

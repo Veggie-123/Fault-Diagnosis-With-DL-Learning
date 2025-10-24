@@ -1,0 +1,12 @@
+# 告诉 Git LFS 追踪以下文件类型。
+# 这些文件在 Git 仓库中将只作为指针存储，
+# 实际的文件内容则存放在 LFS 服务器上。
+
+# 追踪模型检查点文件
+**/checkpoints/**/*.pth filter=lfs diff=lfs merge=lfs -text
+
+# 追踪检查点文件夹中的混淆矩阵图片
+**/checkpoints/**/*.png filter=lfs diff=lfs merge=lfs -text
+
+# 追踪 MATLAB 数据文件
+**/*.mat filter=lfs diff=lfs merge=lfs -text
