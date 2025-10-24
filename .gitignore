@@ -1,0 +1,22 @@
+# Ignore image data
+/My_Code_10_Classes/data/STFTimages/
+/Teacher_Code/data/STFTimages/
+
+# Ignore python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore model checkpoints
+/My_Code_10_Classes/STFT_CNN/checkpoints/
+/My_Code_10_Classes/STFT_CNN_Pretrained/checkpoints/
+/Teacher_Code/checkpoints/
+
+# Ignore results
+/Teacher_Code/results/
+
+# IDE and OS specific files
+.vscode/
+.idea/
+*.DS_Store
