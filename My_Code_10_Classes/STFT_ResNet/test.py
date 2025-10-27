@@ -44,9 +44,16 @@ def main():
             all_preds.extend(predicted.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
 
-    # 6. 打印分类报告
+    # 6. 打印并保存分类报告
+    report = classification_report(all_labels, all_preds)
     print("\n分类报告:")
-    print(classification_report(all_labels, all_preds))
+    print(report)
+
+    # 保存分类报告到文件
+    report_path = f"{config['train']['checkpoint_dir']}/classification_report.txt"
+    with open(report_path, 'w', encoding='utf-8') as f:
+        f.write(report)
+    print(f"分类报告已保存至 {report_path}")
 
     # 7. 绘制并保存混淆矩阵
     cm = confusion_matrix(all_labels, all_preds)
