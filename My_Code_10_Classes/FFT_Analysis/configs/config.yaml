@@ -1,0 +1,15 @@
+data:
+  # 原始 .mat 数据文件所在的目录路径
+  data_path: '../data/matfiles'
+  # 保存地址
+  save_path: './photos'
+  # 目标文件名
+  file_name: 'IR007_0.mat'
+
+  # 原始信号的采样频率 (Hz)
+  sampling_frequency: 12000
+
+  # 带通滤波参数
+  low_cut: 2000.0
+  high_cut: 4000.0
+  fft_order: 5 # 滤波器阶数

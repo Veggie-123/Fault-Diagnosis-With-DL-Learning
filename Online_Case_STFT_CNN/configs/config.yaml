@@ -1,0 +1,34 @@
+data:
+  data_path: "data/matfiles" # 原始数据路径
+  truncated_value: 102912 # 数据集截断值
+  time_steps: 1024 # 样本长度
+  overlap_ratio: 0.5  # 样本重叠率
+  csvfile_path_name: "data/samples_data.csv" # csv 文件路径-名称
+  split_ratios: [0.7, 0.2, 0.1] # 数据集划分比例
+  img_output_dir: "data/STFTimages"  # 时频图像输出目录
+  image_size: 224 # 图像尺寸
+
+cwt:
+  totalscal: 128   # 尺度长度
+  wavename: 'cmor100-1'  # 小波基函数
+
+model:
+  name: "vgg" # 模型名称
+  conv_archs: [[2, 32], [2, 64], [1, 128]]  # VGG 网络结构用的浅层网络
+  num_classes: 10 # 分类数
+  input_channels: 3 # 模型输入维度
+
+training:
+  img_data_path: "data/STFTimages/"  # 图像数据集加载路径
+  batch_size: 32 # 训练批次
+  num_workers: 0 # 数据加载并行线程数
+  shuffle: True
+  drop_last: False
+  epochs: 20  # 训练总轮次
+  patience: 7 # 表示在验证集性能没有提升时，允许训练继续的最大 epoch 数
+  learning_rate: 0.001 # 学习率
+  lradj: "type1" # "type1":定义一种学习率调整策略：学习率在每个 epoch 后乘以 0.5   "type2":定义了一组特定的 epoch 和对应的学习率
+  best_model_path: "./checkpoints"  # 权重文件保存路径
+  predicted_folder_path: "./results/"  # 测试集预测结果保存路径
+
+
