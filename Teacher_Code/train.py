@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='PyTorch VGG Training')
     parser.add_argument('--batch_size', type=int, default=32, help='Input batch size for training (default: 32)')
-    parser.add_argument('--epochs', type=int, default=50, help='Number of epochs to train (default: 50)')
+    parser.add_argument('--epochs', type=int, default=20, help='Number of epochs to train (default: 20)')
     parser.add_argument('--learning_rate', type=float, default=0.001, help='Learning rate (default: 0.001)')
     parser.add_argument('--num_classes', type=int, default=10, help='分类数 (default: 10)')
 

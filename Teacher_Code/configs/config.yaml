@@ -24,7 +24,7 @@ training:
   num_workers: 0 # 数据加载并行线程数
   shuffle: True
   drop_last: False
-  epochs: 50  # 训练总轮次
+  epochs: 20  # 训练总轮次
   patience: 7 # 表示在验证集性能没有提升时，允许训练继续的最大 epoch 数
   learning_rate: 0.001 # 学习率
   lradj: "type1" # "type1":定义一种学习率调整策略：学习率在每个 epoch 后乘以 0.5   "type2":定义了一组特定的 epoch 和对应的学习率

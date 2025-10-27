@@ -74,7 +74,7 @@ model:
 
 train:
   # 训练的总轮次 (epochs)
-  num_epochs: 50
+  num_epochs: 20
   # 每个批次的大小 (batch_size)
   batch_size: 32
   # 优化器的学习率
