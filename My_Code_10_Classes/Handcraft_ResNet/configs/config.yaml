@@ -75,4 +75,4 @@ train:
   # 优化器的学习率
   learning_rate: 0.001
   # 保存模型权重和结果的目录
-  checkpoint_dir: 'checkpoints/run2'
+  checkpoint_dir: 'checkpoints/run1'
