@@ -4,19 +4,19 @@ data:
   # 保存地址
   save_path: './results'
   # 目标文件名
-  file_name: 'OR007@6_0.mat'
+  file_name: 'B014_0.mat'
 
   # 原始信号的采样频率 (Hz)
   sampling_frequency: 12000
 
 processing:
   # 带通滤波参数
-  low_cut: 2300.0
+  low_cut: 2000.0
   high_cut: 4000.0
   fft_order: 5  # 滤波器阶数
 
 analysis:
   # 在频谱上标注的特征频率族，可选：BPFI / BPFO / BSF / FTF / NONE
-  base_feature: 'BPFO'
+  base_feature: 'FTF'
   # 频谱查看的最大频率范围 (Hz)
-  max_view: 1000
+  max_view: 100

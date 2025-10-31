@@ -103,7 +103,7 @@ time = np.linspace(0,len(signal)/fs,len(signal))
 # print(len(time))
 
 # 绘制时域信号
-plot_graph(time, signal, '原始时域图', '时间', '幅度', '原始时域图.png',xlim=(0,0.1))
+plot_graph(time, signal, '原始时域图', '时间', '幅度', '1. 原始时域图.png', xlim=(0,0.1))
 
 
 # 三、初始频谱图分析
@@ -113,7 +113,7 @@ fft_amplitudes = (abs(np.fft.fft(signal))/len(signal))[:len(signal)//2]
 # 计算频率轴
 fft_frequencies = (np.fft.fftfreq(len(signal),1/fs))[:len(signal)//2]
 # 绘制频域信号
-plot_graph(fft_frequencies, fft_amplitudes, '原始频域图', '频率', '振幅', '原始频域图.png')
+plot_graph(fft_frequencies, fft_amplitudes, '原始频域图', '频率', '振幅', '2. 原始频域图.png')
 
 
 # 四、带通滤波
@@ -122,13 +122,13 @@ signal_filtered = sig.filtfilt(b, a, signal)
 print("带通滤波信号的形状:", signal_filtered.shape)
 
 # 绘制时域信号
-plot_graph(time, signal_filtered, '带通滤波时域图', '时间', '幅度', '带通滤波时域图.png',xlim=(0,0.1))
+plot_graph(time, signal_filtered, '带通滤波时域图', '时间', '幅度', '3. 带通时域图.png', xlim=(0,0.1))
 
 # 计算振幅
 fft_amplitudes_filtered = (abs(np.fft.fft(signal_filtered))/len(signal_filtered))[:len(signal_filtered)//2]
 # 计算频率轴
 fft_frequencies_filtered = (np.fft.fftfreq(len(signal_filtered),1/fs))[:len(signal_filtered)//2]
-plot_graph(fft_frequencies_filtered, fft_amplitudes_filtered, '带通滤波频域图', '频率', '振幅', '带通滤波频域图.png')
+plot_graph(fft_frequencies_filtered, fft_amplitudes_filtered, '带通滤波频域图', '频率', '振幅', '4. 带通频域图.png')
 
 
 # 五、希尔伯特变换+包络谱分析
@@ -146,7 +146,7 @@ plt.ylabel('振幅')
 plt.xlim(0, 0.1)
 plt.grid(True)
 plt.legend()
-plt.savefig(os.path.join(save_path, '包络谱时域图.png'),dpi=300,bbox_inches='tight')
+plt.savefig(os.path.join(save_path, '5. 包络时域图.png'), dpi=300, bbox_inches='tight')
 plt.show()
 
 # 计算振幅
@@ -180,20 +180,28 @@ else:
     base_freq = bpfi
     base_label = 'BPFI'
 
-annotations = [{'x': fr, 'color': 'green', 'style': ':', 'label': '转频 fr'}]
-if base_freq is not None and base_freq != None:
-    harmonics = [k * base_freq for k in range(1, int(max_view // base_freq) + 1)]
+annotations = []
+
+# 转频及其前5阶谐波（不超过可视频段）
+max_k_fr = min(5, int(max_view // max(1e-9, fr)))
+fr_harmonics = [k * fr for k in range(1, max_k_fr + 1)]
+annotations += [{'x': f, 'color': 'green', 'style': ':', 'label': f'fr x{idx+1}'} for idx, f in enumerate(fr_harmonics)]
+
+# 选定特征频率族的前5阶倍频（不超过可视频段）
+if base_freq is not None:
+    max_k_feat = min(5, int(max_view // max(1e-9, base_freq)))
+    feat_harmonics = [k * base_freq for k in range(1, max_k_feat + 1)]
     annotations = (
-        [{'x': f, 'color': 'red', 'style': '--', 'label': f'{base_label} x{idx+1}'} for idx, f in enumerate(harmonics)]
+        [{'x': f, 'color': 'red', 'style': '--', 'label': f'{base_label} x{idx+1}'} for idx, f in enumerate(feat_harmonics)]
         + annotations
     )
 
-plot_graph(fft_frequencies_envelope, fft_amplitudes_envelope, '包络谱频域图', '频率', '振幅', '包络谱频域图.png', xlim=(0,max_view), annotations=annotations)
+plot_graph(fft_frequencies_envelope, fft_amplitudes_envelope, '包络谱', '频率', '振幅', '6. 包络谱.png', xlim=(0,max_view), annotations=annotations)
 
 
 # 六、整合分析图
 fig, axs = plt.subplots(2, 3, figsize=(20, 8))
-fig.suptitle('轴承故障信号分析全流程', fontsize=16)
+fig.suptitle(f'轴承故障信号分析全流程 - {file_name}', fontsize=16)
 
 # 1 原始时域
 plot_subplot(axs[0, 0], time, signal, '1. 原始时域信号', '时间', '幅度', xlim=(0,0.1))
@@ -219,6 +227,6 @@ plot_subplot(axs[1, 2], fft_frequencies_envelope, fft_amplitudes_envelope, '6. �
 
 # 最终调整与显示
 plt.tight_layout(rect=[0, 0, 1, 1])  # 为总标题留出空间
-plt.savefig(os.path.join(save_path, '分析全流程图.png'), dpi=300)
+plt.savefig(os.path.join(save_path, f'0. 分析全流程图 - {file_stem}.png'), dpi=300)
 plt.show()
 
