@@ -1,4 +1,3 @@
-from ast import Lambda
 import os
 from random import shuffle
 from turtle import mode

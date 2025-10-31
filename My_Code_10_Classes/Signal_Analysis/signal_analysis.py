@@ -2,13 +2,14 @@ import scipy.io
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import shutil
 from utils.helpers import load_config
 from scipy import signal as sig
 
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 指定默认字体为黑体
 plt.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
 
-def plot_graph(x_data, y_data, title, xlabel, ylabel, save_name, xlim=None):
+def plot_graph(x_data, y_data, title, xlabel, ylabel, save_name, xlim=None, annotations=None):
     """一个用于绘制通用图形的函数"""
     plt.figure(figsize=(15, 5))
     plt.plot(x_data, y_data)
@@ -18,6 +19,11 @@ def plot_graph(x_data, y_data, title, xlabel, ylabel, save_name, xlim=None):
     if xlim:
         plt.xlim(xlim)
     plt.grid(True)
+    # 可选：在单图上叠加竖线标注（如特征频率及倍频）
+    if annotations:
+        for ann in annotations:
+            plt.axvline(x=ann['x'], color=ann['color'], linestyle=ann['style'], label=ann['label'], alpha=0.4)
+        plt.legend()
     plt.savefig(os.path.join(save_path, save_name), dpi=300, bbox_inches='tight')
     plt.show()
 
@@ -32,7 +38,7 @@ def plot_subplot(ax, x_data, y_data, title, xlabel, ylabel, xlim=None, annotatio
         ax.set_xlim(xlim)
     if annotations:
         for ann in annotations:
-            ax.axvline(x=ann['x'], color=ann['color'], linestyle=ann['style'], label=ann['label'])
+            ax.axvline(x=ann['x'], color=ann['color'], linestyle=ann['style'], label=ann['label'], alpha=0.4)
         ax.legend()
 
 # 一、加载数据
@@ -40,17 +46,34 @@ def plot_subplot(ax, x_data, y_data, title, xlabel, ylabel, xlim=None, annotatio
 # 加载文件
 config = load_config('configs/config.yaml')
 data_config = config.get('data', {})
+analysis_config = config.get('analysis', {})
+processing_config = config.get('processing', {})
 data_path = data_config['data_path']  # 原始文件路径
 save_path = data_config['save_path'] # 文件保存地址
 
 file_name = data_config['file_name'] # 目标信号名
 file_path = os.path.join(data_path,file_name) # 故障信号地址
+file_stem, _ = os.path.splitext(file_name)
+save_path = os.path.join(save_path, file_stem)
+os.makedirs(save_path, exist_ok=True)
 mat_data = scipy.io.loadmat(file_path) # 加载故障文件
 
+# 备份当前配置到结果目录，便于追踪本次运行参数
+shutil.copy('configs/config.yaml', os.path.join(save_path, 'config.yaml'))
+
 # 带通滤波参数加载
-fft_order = data_config['fft_order']
-low_cut = data_config['low_cut']
-high_cut = data_config['high_cut']
+fft_order = processing_config['fft_order']
+low_cut = processing_config['low_cut']
+high_cut = processing_config['high_cut']
+
+
+# 自动提取转速（rpm）。若 .mat 未包含，则回退到配置（若仍无，则采用常见工况 1797 rpm）
+rpm = None
+for key_rpm in mat_data.keys():
+    if key_rpm.endswith('RPM'):
+        rpm = float(np.squeeze(mat_data[key_rpm]))
+        break
+fr = rpm / 60.0  # 转频 (Hz)
 
 
 # 寻找目标信号
@@ -130,31 +153,72 @@ plt.show()
 fft_amplitudes_envelope = (abs(np.fft.fft(envelope_no_dc))/len(envelope_no_dc))[:len(envelope_no_dc)//2]
 # 计算频率轴
 fft_frequencies_envelope = (np.fft.fftfreq(len(envelope_no_dc),1/fs))[:len(envelope_no_dc)//2]
-plot_graph(fft_frequencies_envelope, fft_amplitudes_envelope, '包络谱频域图', '频率', '振幅', '包络谱频域图.png',xlim=(0,1000))
+
+# CWRU 缺陷频率倍数，计算特征频率
+bpfi = 5.4152 * fr
+bpfo = 3.5848 * fr
+ftf  = 0.39828 * fr
+bsf  = 4.7135 * fr
+
+## 根据配置选择要标注的特征频率族（BPFI/BPFO/BSF/FTF/NONE）
+max_view = int(analysis_config.get('max_view'))  # 与图像 x 轴范围配合
+base_feature = str(analysis_config.get('base_feature', 'BPFI')).upper()
+
+if base_feature == 'BPFO':
+    base_freq = bpfo
+    base_label = 'BPFO'
+elif base_feature == 'BSF':
+    base_freq = bsf
+    base_label = 'BSF'
+elif base_feature == 'FTF':
+    base_freq = ftf
+    base_label = 'FTF'
+elif base_feature in ['NONE', 'NULL', 'OFF']:
+    base_freq = None
+    base_label = ''
+else:
+    base_freq = bpfi
+    base_label = 'BPFI'
+
+annotations = [{'x': fr, 'color': 'green', 'style': ':', 'label': '转频 fr'}]
+if base_freq is not None and base_freq != None:
+    harmonics = [k * base_freq for k in range(1, int(max_view // base_freq) + 1)]
+    annotations = (
+        [{'x': f, 'color': 'red', 'style': '--', 'label': f'{base_label} x{idx+1}'} for idx, f in enumerate(harmonics)]
+        + annotations
+    )
+
+plot_graph(fft_frequencies_envelope, fft_amplitudes_envelope, '包络谱频域图', '频率', '振幅', '包络谱频域图.png', xlim=(0,max_view), annotations=annotations)
 
 
 # 六、整合分析图
-fig, axs = plt.subplots(2, 2, figsize=(20, 5))
+fig, axs = plt.subplots(2, 3, figsize=(20, 8))
 fig.suptitle('轴承故障信号分析全流程', fontsize=16)
 
-plot_subplot(axs[0, 0], time, signal, '1. 原始时域信号', '时间', '幅度',xlim=(0,0.1))
+# 1 原始时域
+plot_subplot(axs[0, 0], time, signal, '1. 原始时域信号', '时间', '幅度', xlim=(0,0.1))
+# 2 原始频谱
 plot_subplot(axs[0, 1], fft_frequencies, fft_amplitudes, '2. 原始频谱图', '频率', '振幅')
+# 3 带通时域
+plot_subplot(axs[0, 2], time, signal_filtered, '3. 带通滤波时域图', '时间', '幅度', xlim=(0,0.1))
+# 4 带通频谱
+plot_subplot(axs[1, 0], fft_frequencies_filtered, fft_amplitudes_filtered, '4. 带通滤波频谱图', '频率', '振幅')
 
-# 子图3: 滤波与包络
-axs[1, 0].plot(time, signal_filtered, alpha=0.6, label='滤波信号')
-axs[1, 0].plot(time, signal_envelope, color='red', linewidth=2, label='包络')
-axs[1, 0].set_title('3. 滤波信号与包络')
-axs[1, 0].set_xlabel('时间')
-axs[1, 0].set_ylabel('幅度')
-axs[1, 0].set_xlim(0, 0.1)
-axs[1, 0].legend()
-axs[1, 0].grid(True)
+# 5 滤波与包络
+axs[1, 1].plot(time, signal_filtered, alpha=0.6, label='滤波信号')
+axs[1, 1].plot(time, signal_envelope, color='red', label='包络')
+axs[1, 1].set_title('5. 滤波信号与包络')
+axs[1, 1].set_xlabel('时间')
+axs[1, 1].set_ylabel('幅度')
+axs[1, 1].set_xlim(0, 0.1)
+axs[1, 1].legend()
+axs[1, 1].grid(True)
 
-# 准备子图4的注释
-plot_subplot(axs[1, 1], fft_frequencies_envelope, fft_amplitudes_envelope, '4. 最终包络谱分析', '频率', '振幅',xlim=(0,500))
+# 6 包络谱与特征频率标注
+plot_subplot(axs[1, 2], fft_frequencies_envelope, fft_amplitudes_envelope, '6. 最终包络谱分析', '频率', '振幅', xlim=(0,max_view), annotations=annotations)
 
 # 最终调整与显示
-plt.tight_layout(rect=[0, 0, 1, 1]) # 调整布局，为总标题留出空间
+plt.tight_layout(rect=[0, 0, 1, 1])  # 为总标题留出空间
 plt.savefig(os.path.join(save_path, '分析全流程图.png'), dpi=300)
 plt.show()
 
