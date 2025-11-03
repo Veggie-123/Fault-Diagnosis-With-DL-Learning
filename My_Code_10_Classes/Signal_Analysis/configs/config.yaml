@@ -4,7 +4,7 @@ data:
   # 保存地址
   save_path: './results'
   # 目标文件名
-  file_name: 'B014_0.mat'
+  file_name: 'B007_0.mat'
 
   # 原始信号的采样频率 (Hz)
   sampling_frequency: 12000
@@ -16,7 +16,8 @@ processing:
   fft_order: 5  # 滤波器阶数
 
 analysis:
-  # 在频谱上标注的特征频率族，可选：BPFI / BPFO / BSF / FTF / NONE
-  base_feature: 'FTF'
+  # 在频谱上标注的特征频率族，可选：BPFI / BPFO / BSF / FTF / AUTO / NONE
+  # AUTO: 根据文件名自动判断故障类型并选择对应的特征频率
+  base_feature: 'AUTO'
   # 频谱查看的最大频率范围 (Hz)
-  max_view: 100
+  max_view: 500

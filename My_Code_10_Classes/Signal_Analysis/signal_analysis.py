@@ -160,9 +160,27 @@ bpfo = 3.5848 * fr
 ftf  = 0.39828 * fr
 bsf  = 4.7135 * fr
 
+print(f"转速信息: {rpm} RPM -> 转频 fr = {fr:.2f} Hz")
+print(f"特征频率: BPFI = {bpfi:.2f} Hz, BPFO = {bpfo:.2f} Hz, BSF = {bsf:.2f} Hz, FTF = {ftf:.2f} Hz")
+
 ## 根据配置选择要标注的特征频率族（BPFI/BPFO/BSF/FTF/NONE）
 max_view = int(analysis_config.get('max_view'))  # 与图像 x 轴范围配合
-base_feature = str(analysis_config.get('base_feature', 'BPFI')).upper()
+base_feature = str(analysis_config.get('base_feature', 'AUTO')).upper()
+
+# 自动根据文件名判断故障类型
+if base_feature == 'AUTO':
+    if 'IR' in file_name or 'IR' in file_stem:
+        base_feature = 'BPFI'  # 内圈故障
+        print(f"检测到内圈故障文件 '{file_name}'，自动选择 BPFI")
+    elif 'B' in file_name or 'B' in file_stem:
+        base_feature = 'BSF'   # 滚动体故障
+        print(f"检测到滚动体故障文件 '{file_name}'，自动选择 BSF")
+    elif 'OR' in file_name or 'OR' in file_stem:
+        base_feature = 'BPFO'  # 外圈故障
+        print(f"检测到外圈故障文件 '{file_name}'，自动选择 BPFO")
+    else:
+        base_feature = 'BPFI'  # 默认
+        print(f"无法自动判断文件类型，默认使用 BPFI")
 
 if base_feature == 'BPFO':
     base_freq = bpfo
