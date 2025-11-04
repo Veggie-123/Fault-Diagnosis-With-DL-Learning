@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from utils.data_loader import LabeledImageDataset
 from utils.helpers import load_config
-from models.ResNet import ResNet18
+from models.MyCNN import MyCNN
 
 config = load_config('configs/config.yaml')
 
@@ -35,7 +35,7 @@ test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=Fa
 print(f"测试集大小：{len(test_dataset)}")
 print(f"使用设备：{device}")
 
-model = ResNet18(num_classes=num_classes).to(device)
+model = MyCNN(num_classes=num_classes).to(device)
 model_path = os.path.join(checkpoint_dir, "best_model.pth")
 
 model.load_state_dict(torch.load(model_path, weights_only=True))

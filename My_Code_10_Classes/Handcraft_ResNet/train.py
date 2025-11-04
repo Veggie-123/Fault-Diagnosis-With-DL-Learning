@@ -8,6 +8,8 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 import numpy as np
 from tqdm import tqdm 
+import matplotlib
+import matplotlib.pyplot as plt
 
 from utils.data_loader import LabeledImageDataset
 from utils.helpers import load_config
@@ -78,7 +80,7 @@ def train_one_epoch(model, train_loader, criterion, optimizer, device):
     return epoch_loss, epoch_acc
 
 def validate(model, val_loader, criterion, device):
-    model.eval
+    model.eval()
 
     running_loss = 0.0
     correct = 0
@@ -114,6 +116,35 @@ print(f"总Epochs: {num_epochs}\n")
 
 best_val_acc = 0.0
 
+# 指标记录
+history = {
+    'train_loss': [],
+    'train_acc': [],
+    'val_loss': [],
+    'val_acc': []
+}
+
+# 实时绘图初始化（若环境不支持可忽略）
+plt.ion()
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+fig.suptitle('Training Progress')
+
+def update_plot():
+    epochs = range(1, len(history['train_loss']) + 1)
+    ax1.clear(); ax2.clear()
+    ax1.plot(epochs, history['train_loss'], label='train_loss')
+    ax1.plot(epochs, history['val_loss'], label='val_loss')
+    ax1.set_xlabel('Epoch'); ax1.set_ylabel('Loss'); ax1.legend(); ax1.grid(True)
+    ax2.plot(epochs, history['train_acc'], label='train_acc')
+    ax2.plot(epochs, history['val_acc'], label='val_acc')
+    ax2.set_xlabel('Epoch'); ax2.set_ylabel('Acc (%)'); ax2.legend(); ax2.grid(True)
+    fig.tight_layout()
+    try:
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+    except Exception:
+        pass
+
 for epoch in range(num_epochs):
     print(f"\n{'='*50}")
     print(f"Epoch [{epoch+1}/{num_epochs}]")
@@ -126,6 +157,13 @@ for epoch in range(num_epochs):
     print(f"\n训练 - Loss: {train_loss:.4f}, Acc: {train_acc:.2f}%")
     print(f"验证 - Loss: {val_loss:.4f}, Acc: {val_acc:.2f}%")
 
+    # 记录历史并更新曲线
+    history['train_loss'].append(train_loss)
+    history['train_acc'].append(train_acc)
+    history['val_loss'].append(val_loss)
+    history['val_acc'].append(val_acc)
+    update_plot()
+
     if val_acc > best_val_acc:
         best_val_acc = val_acc
         best_model_path = os.path.join(checkpoint_dir, 'best_model.pth')
@@ -135,3 +173,12 @@ print("\n" + "="*50)
 print("训练完成!")
 print(f"最佳验证准确率: {best_val_acc:.2f}%")
 print("="*50)
+
+# 训练结束后，保存最终曲线图
+final_curve_path = os.path.join(checkpoint_dir, 'training_curves.png')
+fig.savefig(final_curve_path, dpi=150)
+plt.ioff()
+try:
+    plt.close(fig)
+except Exception:
+    pass
