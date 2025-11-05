@@ -2,7 +2,7 @@ import os
 import sys
 from scipy.io import loadmat
 import pandas as pd
-from utils.helpers import load_config
+from Handcraft_ResNet.utils.helpers import load_config
 
 def find_data_key(mat_data):
     for key in mat_data.keys():
@@ -62,7 +62,7 @@ def make_samples(data_path, file_names, truncated_value, time_steps, overlap_rat
 
 if __name__ == '__main__':
     # 1. 加载配置文件
-    config = load_config('configs/config.yaml')
+    config = load_config('Handcraft_ResNet/configs/config.yaml')
     data_config = config.get('data', {})
 
     # 2. 从配置中提取参数
