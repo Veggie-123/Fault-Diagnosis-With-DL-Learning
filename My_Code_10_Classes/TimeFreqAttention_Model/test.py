@@ -24,7 +24,7 @@ import pandas as pd
 plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
 
-from models.TimeFreqAttention_clean import create_model
+from models.TimeFreqAttention import create_model
 from utils.helpers import load_config
 
 # 与 train.py 一致的简易 .npy 数据集读取器

@@ -28,7 +28,7 @@ import pandas as pd
 plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
 
-from models.TimeFreqAttention_clean import create_model  # 模型：CNN + BiGRU + Attention
+from models.TimeFreqAttention import create_model  # 模型：CNN + BiGRU + Attention
 from utils.helpers import load_config              # 读取 YAML 配置
 
 # ==================== 简单的 .npy 索引数据集 ====================
@@ -232,7 +232,7 @@ for epoch in range(num_epochs):
 	history['val_acc'].append(val_acc)
 	update_plot()
 	# 保存最佳模型（按验证准确率）
-	if val_acc > best_val_acc:
+	if val_acc >= best_val_acc:
 		best_val_acc = val_acc
 		best_model_path = os.path.join(checkpoint_dir, 'best_model.pth')
 		torch.save(model.state_dict(), best_model_path)

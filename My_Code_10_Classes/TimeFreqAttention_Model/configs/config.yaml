@@ -47,7 +47,7 @@ wavelet:
   wavelet_type: 'db4'
   
   # 小波包分解层数（决定频带数，频带数 = 2^max_level）
-  max_level: 4
+  max_level: 6
 
 # 模型配置
 model:
@@ -72,10 +72,10 @@ train:
   batch_size: 32
   
   # 优化器的学习率
-  learning_rate: 0.001
+  learning_rate: 0.0005
   
   # 保存模型权重和结果的目录
-  checkpoint_dir: 'checkpoints/run6_R_Atentionpro'
+  checkpoint_dir: 'checkpoints/6.attention(2residuals)'
   
   # 学习率调度器配置
   scheduler:
