@@ -44,7 +44,7 @@ class TimeFreqAttentionModel(nn.Module):
         self.bn1 = nn.BatchNorm1d(cnn_out_channels)
         self.cnn2 = nn.Conv1d(cnn_out_channels, cnn_out_channels, kernel_size=3, padding=1)
         self.bn2 = nn.BatchNorm1d(cnn_out_channels)
-
+        
         # 双向 GRU：输入维度等于 CNN 输出通道数
         self.bigru = nn.GRU(input_size=cnn_out_channels,
                             hidden_size=gru_hidden_dim,
